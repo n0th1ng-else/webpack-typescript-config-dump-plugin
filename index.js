@@ -2,7 +2,7 @@ const fs = require('fs');
 const _ = require('lodash');
 const weblog = require('webpack-log');
 
-const log = weblog({ name: 'wtcd' })
+const log = weblog({ name: 'wtcd' });
 
 module.exports = class TypescriptConfigDumpPlugin {
 	constructor(options = {}) {
@@ -44,7 +44,10 @@ module.exports = class TypescriptConfigDumpPlugin {
 		const checker = new RegExp(rule.test);
 		if (checker.test('.ts')) {
 			return _.find(rule.use, ld => {
-				return ['ts-loader', 'awesome-typescript-loader'].includes(ld.loader);
+				const resolvedByName = ['ts-loader', 'awesome-typescript-loader'].includes(ld.loader);
+				const tsFullPath = ld.loader && ld.loader.indexOf('ts-loader') > -1;
+				const atsFullPath = ld.loader && ld.loader.indexOf('awesome-typescript-loader') > -1;
+				return resolvedByName || tsFullPath || atsFullPath;
 			});
 		}
 	}
