@@ -1,4 +1,5 @@
 const fs = require('fs');
+const util = require('util');
 const _ = require('lodash');
 const weblog = require('webpack-log');
 
@@ -79,7 +80,8 @@ module.exports = class TypescriptConfigDumpPlugin {
 			}
 		}
 		try {
-			fs.writeFileSync(`${this.outputPath}/${this.name}`, JSON.stringify(dumpCfg));
+			const dump = util.inspect(dumpCfg, { depth: 10 });
+			fs.writeFileSync(`${this.outputPath}/${this.name}`, dump);
 		} catch (err) {
 			log.warn('Could not create dump file:', err);
 		}

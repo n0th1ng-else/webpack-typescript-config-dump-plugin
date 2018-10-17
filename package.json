@@ -1,7 +1,7 @@
 {
   "name": "webpack-typescript-config-dump-plugin",
   "description": "A webpack plugin to cache compiled typescipt config on the file system",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "author": "Sergey Nikitin",
   "license": "MIT",
   "main": "index.js",
