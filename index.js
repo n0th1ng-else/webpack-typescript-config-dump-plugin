@@ -1,5 +1,8 @@
 const fs = require('fs');
 const _ = require('lodash');
+const weblog = require('webpack-log');
+
+const log = weblog({ name: 'wtcd' })
 
 module.exports = class TypescriptConfigDumpPlugin {
 	constructor(options = {}) {
@@ -8,52 +11,74 @@ module.exports = class TypescriptConfigDumpPlugin {
 	}
 
 	apply(compiler) {
-		let tsLoader = this.findTsLoader(compiler.options);
-
-		if (tsLoader) {
-			this.options = tsLoader.options;
-			this.dumpTsConfig();
-		}
+		this.findTsLoader(compiler.options);
+		this.dumpTsConfig();
 	}
 
 	findTsLoader(webpackOptions) {
 		const rules = webpackOptions.module.rules;
-		let tsLoader;
+
 		_.forEach(rules, rule => {
-			if (rule.oneOf) {
+			if (!rule.oneOf) {
+				const loader = this.tryTogGetLoader(rule);
+				if (loader) {
+					this.loader = loader;
+					return false;
+				}
+			} else {
 				_.forEach(rule.oneOf, ext => {
-					const tsLoaderSearcher = _.find(ext.use, loader => _.includes(loader.loader, 'ts-loader'));
-					if (tsLoaderSearcher) {
-						tsLoader = tsLoaderSearcher;
+					const loader = this.tryTogGetLoader(ext);
+					if (loader) {
+						this.loader = loader;
 						return false;
 					}
 				});
-				if (tsLoader) {
+				if (this.loader) {
 					return false;
 				}
 			}
 		});
+	}
 
-		return tsLoader;
-    }
+	tryTogGetLoader(rule) {
+		const checker = new RegExp(rule.test);
+		if (checker.test('.ts')) {
+			return _.find(rule.use, ld => {
+				return ['ts-loader', 'awesome-typescript-loader'].includes(ld.loader);
+			});
+		}
+	}
 
 	dumpTsConfig() {
-		const repoConfig = this.options.configFile ? require(this.options.configFile) : {};
-		const loaderConfig = this.options.compilerOptions ? {compilerOptions: this.options.compilerOptions} : {};
-		const dumpCfg = _.merge({}, repoConfig, loaderConfig);
+		const configFile = _.get(this.loader, ['options', 'configFile'], './tsconfig.json');
+		const compilerOptions = _.get(this.loader, ['options', 'compilerOptions']);
+
+		if (!compilerOptions) {
+			return;
+		}
+
+		let repoConfig;
+		try {
+			repoConfig = require(configFile);
+		} catch(e) {
+			log.warn("can't load tsconfig", configFile);
+			repoConfig = {};
+		}
+
+		const dumpCfg = _.merge({}, repoConfig, compilerOptions);
 
 		if (!fs.existsSync(this.outputPath)) {
 			try {
 				fs.mkdirSync(this.outputPath);
 			} catch (err) {
-				console.warn('Could not create cache folder:', err);
+				log.warn('Could not create cache folder:', err);
 				return;
 			}
 		}
 		try {
 			fs.writeFileSync(`${this.outputPath}/${this.name}`, JSON.stringify(dumpCfg));
 		} catch (err) {
-			console.warn('Could not create dump file:', err);
+			log.warn('Could not create dump file:', err);
 		}
 	}
 };
