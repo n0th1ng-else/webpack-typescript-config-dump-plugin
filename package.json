@@ -1,8 +1,8 @@
 {
   "name": "webpack-typescript-config-dump-plugin",
-  "description": "A webpack plugin to cache compiled typescipt config on the file system",
-  "version": "1.1.2",
-  "author": "Sergey Nikitin",
+  "description": "A webpack plugin to cache compiled typescript config on the file system",
+  "version": "1.1.3",
+  "author": "Sergey Nikitin <srg.post@gmail.com>",
   "license": "MIT",
   "main": "index.js",
   "scripts": {
@@ -24,7 +24,7 @@
     "config"
   ],
   "dependencies": {
-    "lodash": "4.17.11",
-    "webpack-log": "2.0.0"
+    "lodash": "4.17.15",
+    "webpack-log": "3.0.1"
   }
 }
