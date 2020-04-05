@@ -1,6 +1,9 @@
 const fs = require('fs');
 const util = require('util');
-const _ = require('lodash');
+const forEach = require('lodash').forEach;
+const find = require('lodash').find;
+const get = require('lodash').get;
+const merge = require('lodash').merge;
 const weblog = require('webpack-log');
 
 const log = weblog({ name: 'wtcd' });
@@ -19,7 +22,7 @@ module.exports = class TypescriptConfigDumpPlugin {
 	findTsLoader(webpackOptions) {
 		const rules = webpackOptions.module.rules;
 
-		_.forEach(rules, rule => {
+		forEach(rules, rule => {
 			if (!rule.oneOf) {
 				const loader = this.tryTogGetLoader(rule);
 				if (loader) {
@@ -27,7 +30,7 @@ module.exports = class TypescriptConfigDumpPlugin {
 					return false;
 				}
 			} else {
-				_.forEach(rule.oneOf, ext => {
+				forEach(rule.oneOf, ext => {
 					const loader = this.tryTogGetLoader(ext);
 					if (loader) {
 						this.loader = loader;
@@ -44,7 +47,7 @@ module.exports = class TypescriptConfigDumpPlugin {
 	tryTogGetLoader(rule) {
 		const checker = new RegExp(rule.test);
 		if (checker.test('.ts')) {
-			return _.find(rule.use, ld => {
+			return find(rule.use, ld => {
 				const resolvedByName = ['ts-loader', 'awesome-typescript-loader'].includes(ld.loader);
 				const tsFullPath = ld.loader && ld.loader.indexOf('ts-loader') > -1;
 				const atsFullPath = ld.loader && ld.loader.indexOf('awesome-typescript-loader') > -1;
@@ -54,8 +57,8 @@ module.exports = class TypescriptConfigDumpPlugin {
 	}
 
 	dumpTsConfig() {
-		const configFile = _.get(this.loader, ['options', 'configFile'], './tsconfig.json');
-		const compilerOptions = _.get(this.loader, ['options', 'compilerOptions']);
+		const configFile = get(this.loader, ['options', 'configFile'], './tsconfig.json');
+		const compilerOptions = get(this.loader, ['options', 'compilerOptions']);
 
 		if (!compilerOptions) {
 			return;
@@ -69,7 +72,7 @@ module.exports = class TypescriptConfigDumpPlugin {
 			repoConfig = {};
 		}
 
-		const dumpCfg = _.merge({}, repoConfig, compilerOptions);
+		const dumpCfg = merge({}, repoConfig, compilerOptions);
 
 		if (!fs.existsSync(this.outputPath)) {
 			try {
