@@ -24,7 +24,7 @@
     "config"
   ],
   "dependencies": {
-    "lodash": "4.17.15",
+    "lodash": "4.17.19",
     "webpack-log": "3.0.1"
   }
 }
