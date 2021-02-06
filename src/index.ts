@@ -70,13 +70,13 @@ export class TypescriptConfigDumpPlugin {
     const configFile = get(
       this.loader,
       ["options", "configFile"],
-      "./tsconfig.json"
+      "../../../tsconfig.json"
     );
-    const compilerOptions = get(this.loader, ["options", "compilerOptions"]);
-
-    if (!compilerOptions) {
-      return;
-    }
+    const compilerOptions = get(
+      this.loader,
+      ["options", "compilerOptions"],
+      {}
+    );
 
     let repoConfig;
     try {
